@@ -1,0 +1,57 @@
+name: "Synopsys Security Scan (SCA)"
+
+on:
+  workflow_call:
+    inputs:
+      BLACKDUCK_URL:
+        required: true
+        type: string
+      PROJECT_NAME:
+        required: true
+        type: string
+      APPLICATION_NAME:
+        required: true
+        type: string
+      POLICY_NAME:
+        required: true
+        type: string
+      SCAN_TYPE:
+        required: false
+        type: string
+        default: RAPID
+    secrets:
+      BLACKDUCK_API_TOKEN:
+        required: true
+    
+jobs:
+  security:
+    name: Synopsys Security Scan (SCA)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Create Black Duck Policy
+      uses: blackducksoftware/create-policy-action@v0.0.1
+      with:
+        blackduck-url: ${{ github.event.inputs.BLACKDUCK_URL }}
+        blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
+        policy-name: ${{ github.event.inputs.POLICY_NAME }}
+        no-fail-if-policy-exists: true
+
+    - name: Run Synopsys Detect
+      uses: synopsys-sig/detect-action@v0.3.2
+      with:
+          scan-mode: ${{ github.event.inputs.SCAN_TYPE }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          detect-version: 7.9.0
+          blackduck-url: ${{ github.event.inputs.BLACKDUCK_URL }}
+          blackduck-api-token: ${{ secrets.BLACKDUCK_API_TOKEN }}
