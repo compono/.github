@@ -15,6 +15,10 @@ on:
       POLICY_NAME:
         required: true
         type: string
+      SCAN_TYPE:
+        required: false
+        type: string
+        default: RAPID
     secrets:
       BLACKDUCK_API_TOKEN:
         required: true
@@ -46,7 +50,7 @@ jobs:
     - name: Run Synopsys Detect
       uses: synopsys-sig/detect-action@v0.3.2
       with:
-          scan-mode: RAPID
+          scan-mode: ${{ github.event.inputs.SCAN_TYPE }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           detect-version: 7.9.0
           blackduck-url: ${{ github.event.inputs.BLACKDUCK_URL }}
